@@ -1,0 +1,210 @@
+"use client";
+
+import { Calendar, CreditCard, Search, DollarSign, Users, Activity } from "lucide-react";
+import { format } from "date-fns";
+import { PaginationControls } from "@/components/shared/PaginationControls";
+
+import { StatCard } from "@/components/ui/stat-card";
+
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+export function TransactionsTable({ 
+  transactions = [], 
+  stats = {},
+  title, 
+  description, 
+  role = "admin", 
+  currentUserEmail,
+  search = "",
+  onSearchChange = () => {},
+  dateFilter = "30",
+  onDateFilterChange = () => {},
+  currentPage = 1,
+  totalPages = 1,
+  onPageChange = () => {}
+}) {
+  const isExpense = (tx) => {
+    if (role === "user") return true;
+    return currentUserEmail && tx.userEmail === currentUserEmail;
+  };
+
+  const totalRevenue = stats.totalRevenue || 0;
+  const totalEarnings = stats.totalEarnings || 0;
+  const totalSpent = stats.totalSpent || 0;
+  
+  const totalTransactions = stats.totalTransactions || 0;
+  const uniqueUsers = stats.uniqueUsers || 0;
+  const avgTransaction = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
+  const avgClassPrice = (stats.expenseCount || 0) > 0 ? totalSpent / stats.expenseCount : 0;
+  const expenseTxsLength = stats.expenseCount || 0;
+  const incomeTxsLength = stats.incomeCount || 0;
+
+  const filteredTransactions = transactions;
+
+  return (
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      
+      {/* Header Section */}
+      <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="font-heading text-3xl font-bold text-foreground tracking-wide">{title}</h1>
+          <p className="mt-1 text-muted-foreground">
+            {description}
+          </p>
+        </div>
+      </section>
+
+      {/* Summary Statistics */}
+      <section className={`grid gap-4 sm:grid-cols-2 lg:grid-cols-${role === "user" ? "3" : "4"}`}>
+        <StatCard
+          title={role === "admin" ? "Total Revenue" : role === "trainer" ? "Total Earnings" : "Total Spent"}
+          value={role === "user" ? totalSpent : role === "trainer" ? totalEarnings : totalRevenue}
+          icon={DollarSign}
+          color="emerald"
+          prefix="$"
+        />
+        
+        <StatCard
+          title={role === "admin" ? "Transactions" : role === "trainer" ? "Total Spent" : "Classes Booked"}
+          value={role === "trainer" ? totalSpent : role === "user" ? expenseTxsLength : totalTransactions}
+          icon={role === "trainer" ? DollarSign : CreditCard}
+          color={role === "trainer" ? "red" : "blue"}
+          prefix={role === "trainer" ? "$" : ""}
+        />
+
+        {role !== "user" && (
+          <StatCard
+            title={role === "admin" ? "Unique Users" : "Classes Sold"}
+            value={role === "trainer" ? incomeTxsLength : uniqueUsers}
+            icon={role === "trainer" ? CreditCard : Users}
+            color={role === "trainer" ? "blue" : "purple"}
+          />
+        )}
+
+        <StatCard
+          title={role === "admin" ? "Avg. Transaction" : role === "trainer" ? "Classes Booked" : "Avg. Class Price"}
+          value={role === "trainer" ? expenseTxsLength : role === "user" ? avgClassPrice : avgTransaction}
+          icon={Activity}
+          color="orange"
+          prefix={role !== "trainer" ? "$" : ""}
+        />
+      </section>
+
+      {/* Filters & Search */}
+      <Card className="flex flex-col gap-4 sm:flex-row sm:items-center justify-between border-slate-200 dark:border-slate-800 bg-card/50 backdrop-blur-sm p-4 shadow-sm rounded-xl">
+        <div className="relative w-full flex-1">
+          <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search by email, ID, or class title..."
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="h-11 rounded-xl border-slate-200 dark:border-slate-800 bg-background/50 pl-11 pr-4 text-sm font-medium focus-visible:ring-blue-500/50 w-full"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <Select value={dateFilter} onValueChange={onDateFilterChange}>
+            <SelectTrigger className="h-11 w-[160px] rounded-xl border-slate-200 dark:border-slate-800 bg-background/50 text-sm font-medium focus:ring-blue-500/50">
+              <div className="flex items-center gap-2">
+                <Calendar className="size-4 text-muted-foreground" />
+                <SelectValue placeholder="Date Range" />
+              </div>
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-slate-200 dark:border-slate-800 bg-background/95 backdrop-blur-xl">
+              <SelectItem value="7">Last 7 Days</SelectItem>
+              <SelectItem value="30">Last 30 Days</SelectItem>
+              <SelectItem value="all">All Time</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </Card>
+
+      {/* Transactions Table */}
+      <Card className="overflow-hidden border-slate-200 dark:border-slate-800 bg-card/50 backdrop-blur-sm shadow-sm rounded-xl">
+        <Table>
+          <TableHeader className="bg-muted/30">
+            <TableRow className="border-slate-200 dark:border-slate-800 hover:bg-transparent">
+              <TableHead className="px-6 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-xs h-12">Class & ID</TableHead>
+              <TableHead className="px-6 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-xs">User Email</TableHead>
+              <TableHead className="px-6 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-xs">Amount</TableHead>
+              <TableHead className="px-6 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-xs">Date</TableHead>
+              <TableHead className="px-6 font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-xs text-right">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredTransactions.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                  No transactions found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredTransactions.map((tx) => {
+                const dateObj = new Date(tx.createdAt);
+                const formattedDate = format(dateObj, "dd MMM yyyy, hh:mm a");
+                const [datePart, timePart] = formattedDate.split(", ");
+                
+                return (
+                  <TableRow key={tx._id || tx.sessionId} className="border-slate-200 dark:border-slate-800 group hover:bg-muted/20 even:bg-muted/10 transition-colors">
+                    <TableCell className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${isExpense(tx) ? "bg-blue-500/10 text-blue-600" : "bg-emerald-500/10 text-emerald-600"}`}>
+                          <CreditCard className="size-5" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-sm text-foreground">{tx.title || "Class"}</span>
+                          <span className="font-mono text-[10px] text-muted-foreground">ID: {tx.transactionId || tx.sessionId || "N/A"}</span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-6 py-4">
+                      <span className="font-medium text-muted-foreground">{tx.userEmail || "N/A"}</span>
+                    </TableCell>
+                    <TableCell className="px-6 py-4">
+                      <span className={`inline-flex items-center gap-1 font-bold text-base ${isExpense(tx) ? "text-blue-500" : "text-emerald-500"}`}>
+                        {isExpense(tx) ? "-" : "+"}${tx.price?.toFixed(2)}
+                      </span>
+                    </TableCell>
+                    <TableCell className="px-6 py-4">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-medium text-foreground">{datePart}</span>
+                        <span className="text-xs text-muted-foreground">{timePart}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-6 py-4 text-right">
+                      <Badge className="uppercase shadow-none border-0 bg-emerald-100 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/30">
+                        {tx.status || "Paid"}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+        <PaginationControls 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+        />
+      </Card>
+    </div>
+  );
+}
