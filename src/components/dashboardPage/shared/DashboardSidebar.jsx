@@ -177,10 +177,10 @@ export function DashboardSidebar() {
         )}
       >
       <div className={cn("flex h-16 items-center border-b border-zinc-200 dark:border-zinc-800", isCollapsed ? "justify-center px-0" : "px-6")}>
-        <Link href="/" className="flex items-center gap-2 outline-none group overflow-hidden">
+        <Link href="/" className="flex items-center outline-none group">
           {isCollapsed ? (
             <img 
-              src="/NavbarLogo.png" 
+              src="/FItFlow_Logo.png" 
               alt="FitFlow Icon" 
               className="size-7 object-contain transition-transform duration-300 group-hover:scale-105 dark:brightness-0 dark:invert" 
             />
@@ -314,7 +314,7 @@ export function DashboardSidebar() {
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex justify-center">
-                <LogoutButton className="flex items-center justify-center size-10 rounded-xl text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-red-600 dark:hover:text-red-500 transition-all" iconClassName="size-4" />
+                <LogoutButton text="" className="flex items-center justify-center size-10 rounded-xl text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-red-600 dark:hover:text-red-500 transition-all" iconClassName="size-4" />
               </div>
             </TooltipTrigger>
             <TooltipContent side="right" sideOffset={12} className="font-semibold text-xs bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border-none rounded-lg px-3 py-1.5 shadow-md">
