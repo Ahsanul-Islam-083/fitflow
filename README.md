@@ -18,9 +18,8 @@ This product combines search, booking, authentication, and community features in
 
 ## Live Links
 
-- **Live Platform:** [FitFlow Live]()
-- **Client Repository:** [GitHub - Client]()
-- **Server Repository:** [GitHub - Server]()
+- **Live Platform:** [FitFlow Live](https://fitflow-green.vercel.app)
+- **Server Repository:** [GitHub - Server](https://github.com/Ahsanul-Islam-083/fitflow-server)
 
 ---
 
